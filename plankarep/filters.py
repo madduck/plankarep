@@ -73,6 +73,18 @@ def is_future(value: Any, now: datetime | None = None) -> bool:
     return _parse_datetime(value) > reference
 
 
+def now() -> datetime:
+    """Return the current time as an aware UTC datetime.
+
+    Templates call this to obtain a reference point for comparisons against
+    Planka timestamps, or to format it with :func:`datefmt`.
+
+    Returns:
+        The current time in UTC.
+    """
+    return datetime.now(tz=UTC)
+
+
 def build_environment(
     search_path: Path | None = None, *, autoescape: bool = False
 ) -> Environment:
@@ -103,4 +115,5 @@ def build_environment(
     environment.filters["datefmt"] = datefmt
     environment.tests["past"] = is_past
     environment.tests["future"] = is_future
+    environment.globals["now"] = now
     return environment

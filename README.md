@@ -129,13 +129,20 @@ directory.
 
 ## Filters and tests
 
-plankarep adds three helpers to the template context.
+plankarep adds four helpers to the template context.
 
 - `datefmt` formats an ISO 8601 timestamp. The default format is `%Y-%m-%d`.
   A `None` value renders as an empty string.
 
   ```jinja
   {{ card.dueDate | datefmt('%d.%m.%Y') }}
+  ```
+
+- `now` returns the current time in UTC. Use it with `datefmt` to stamp a
+  report, or compare it against a Planka timestamp.
+
+  ```jinja
+  Report generated on {{ now() | datefmt('%d.%m.%Y %H:%M') }} UTC.
   ```
 
 - `past` tests whether a timestamp is earlier than now.
