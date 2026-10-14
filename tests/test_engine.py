@@ -10,6 +10,7 @@ import pytest
 from plankarep.config import Config, PlnkConfig, RenderOptions
 from plankarep.engine import (
     build_argv,
+    build_context,
     build_env,
     collect_views,
     invoke_view,
@@ -171,6 +172,63 @@ def test_collect_views_runs_every_view(
     assert len(runner.calls) == len(config.views)
 
 
+def test_build_context_includes_views(
+    make_completed: CompletedFactory,
+    make_payload: PayloadFactory,
+    fake_runner: RunnerFactory,
+) -> None:
+    runner = fake_runner(make_completed(stdout=make_payload([{"id": "1"}])))
+    config = Config(plnk=PlnkConfig(), views={"cards": "card list"})
+
+    assert build_context(config, runner) == {"views": {"cards": [{"id": "1"}]}}
+
+
+def test_build_context_includes_server(
+    make_completed: CompletedFactory,
+    make_payload: PayloadFactory,
+    fake_runner: RunnerFactory,
+) -> None:
+    runner = fake_runner(make_completed(stdout=make_payload([])))
+    config = Config(
+        plnk=PlnkConfig(server="https://planka.example.org"),
+        views={"cards": "card list"},
+    )
+
+    assert build_context(config, runner) == {
+        "views": {"cards": []},
+        "server": "https://planka.example.org",
+    }
+
+
+def test_build_context_omits_unset_server(
+    make_completed: CompletedFactory,
+    make_payload: PayloadFactory,
+    fake_runner: RunnerFactory,
+) -> None:
+    runner = fake_runner(make_completed(stdout=make_payload([])))
+    config = Config(plnk=PlnkConfig(), views={"cards": "card list"})
+
+    assert "server" not in build_context(config, runner)
+
+
+def test_render_exposes_server(
+    tmp_path: Path,
+    make_completed: CompletedFactory,
+    make_payload: PayloadFactory,
+    fake_runner: RunnerFactory,
+) -> None:
+    (tmp_path / "t.j2").write_text("{{ server }}", encoding="utf-8")
+    runner = fake_runner(make_completed(stdout=make_payload([])))
+    config = Config(
+        plnk=PlnkConfig(server="https://planka.example.org"),
+        views={"cards": "card list"},
+    )
+
+    result = render(config, "t.j2", search_path=tmp_path, runner=runner)
+
+    assert result == "https://planka.example.org"
+
+
 def test_render_file(
     tmp_path: Path,
     make_completed: CompletedFactory,
@@ -178,7 +236,7 @@ def test_render_file(
     fake_runner: RunnerFactory,
 ) -> None:
     (tmp_path / "t.j2").write_text(
-        "{% for c in cards %}{{ c.name }}{% endfor %}", encoding="utf-8"
+        "{% for c in views.cards %}{{ c.name }}{% endfor %}", encoding="utf-8"
     )
     runner = fake_runner(make_completed(stdout=make_payload([{"name": "Alpha"}])))
     config = Config(plnk=PlnkConfig(), views={"cards": "card list"})
@@ -202,7 +260,7 @@ def test_render_honours_autoescape(
     make_payload: PayloadFactory,
     fake_runner: RunnerFactory,
 ) -> None:
-    (tmp_path / "t.j2").write_text("{{ cards[0].name }}", encoding="utf-8")
+    (tmp_path / "t.j2").write_text("{{ views.cards[0].name }}", encoding="utf-8")
     runner = fake_runner(make_completed(stdout=make_payload([{"name": "A & B"}])))
     config = Config(
         plnk=PlnkConfig(),
@@ -227,7 +285,7 @@ def test_render_string_honours_autoescape(
     )
 
     result = render_string(
-        config, "{{ cards[0].name }}", search_path=tmp_path, runner=runner
+        config, "{{ views.cards[0].name }}", search_path=tmp_path, runner=runner
     )
 
     assert result == "A &amp; B"
@@ -262,7 +320,7 @@ def test_render_uses_default_runner(
     make_payload: PayloadFactory,
     stub_runner: Any,
 ) -> None:
-    (tmp_path / "t.j2").write_text("{{ cards | length }}", encoding="utf-8")
+    (tmp_path / "t.j2").write_text("{{ views.cards | length }}", encoding="utf-8")
     completed = make_completed(stdout=make_payload([{"id": "1"}, {"id": "2"}]))
     monkeypatch.setattr("plankarep.engine.run_plnk", stub_runner(completed))
     config = Config(plnk=PlnkConfig(), views={"cards": "card list"})
@@ -281,7 +339,7 @@ def test_render_string(
 
     result = render_string(
         config,
-        "{% for c in cards %}{{ c.name }}{% endfor %}",
+        "{% for c in views.cards %}{{ c.name }}{% endfor %}",
         search_path=tmp_path,
         runner=runner,
     )

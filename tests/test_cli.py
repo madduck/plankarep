@@ -22,7 +22,7 @@ def write_inputs(tmp_path: Path) -> tuple[Path, Path]:
     config = tmp_path / "plankarep.toml"
     config.write_text(CONFIG, encoding="utf-8")
     template = tmp_path / "t.j2"
-    template.write_text("{{ c[0].name }}", encoding="utf-8")
+    template.write_text("{{ views.c[0].name }}", encoding="utf-8")
     return config, template
 
 
@@ -64,7 +64,7 @@ def test_cli_reads_template_from_stdin(
     result = CliRunner().invoke(
         main,
         ["--config", str(config), "--template", "-"],
-        input="{{ c[0].name }}",
+        input="{{ views.c[0].name }}",
     )
 
     assert result.exit_code == 0

@@ -150,12 +150,35 @@ def collect_views(config: Config, runner: Runner) -> dict[str, Any]:
     }
 
 
+def build_context(config: Config, runner: Runner) -> dict[str, Any]:
+    """Build the template context for a configuration.
+
+    Every view is scoped under the ``views`` name, so the view ``overdue`` is
+    available as ``views.overdue``. The context also contains ``server`` when
+    the configuration provides a Planka server URL.
+
+    Args:
+        config: The plankarep configuration.
+        runner: The callable that executes ``plnk``.
+
+    Returns:
+        Mapping of context name to its value.
+
+    Raises:
+        PlankarepError: If any view fails.
+    """
+    context: dict[str, Any] = {"views": collect_views(config, runner)}
+    if config.plnk.server is not None:
+        context["server"] = config.plnk.server
+    return context
+
+
 def _render_context(
     config: Config, template: Template, runner: Runner, description: str
 ) -> str:
     """Collect view data and render ``template`` with it."""
     try:
-        return template.render(collect_views(config, runner))
+        return template.render(build_context(config, runner))
     except TemplateError as exc:
         msg = f"{description}: {exc}"
         raise PlankarepError(msg) from exc
