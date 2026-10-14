@@ -3,7 +3,7 @@
 plankarep builds text reports from [Planka](https://planka.app) data. It runs
 one or more [`plnk`](https://github.com/plattnum/planka-cli) commands, collects
 the JSON output, and renders a [Jinja2](https://jinja.palletsprojects.com/)
-template with those data.
+template with that data.
 
 Each entry in the `[views]` table of the configuration becomes one template
 variable. The variable holds the `data` array from the `plnk` response.
