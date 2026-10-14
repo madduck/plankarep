@@ -43,6 +43,10 @@ dev = [
   "ruff>=0.17",
   "types-setuptools>=70.0",
 ]
+scripts = [
+  "markdown2>=2.5",
+  "matrix-nio>=0.26",
+]
 
 [tool.setuptools_scm]
 version_file = "plankarep/_version.py"
@@ -142,7 +146,7 @@ strict = true
 files = ["plankarep", "tests", "scripts"]
 
 [[tool.mypy.overrides]]
-module = "ipdb"
+module = ["ipdb", "markdown2", "nio"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
