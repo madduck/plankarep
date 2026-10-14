@@ -132,8 +132,9 @@ value renders as an empty string.
 
 =item C<now>
 
-Return the current time in UTC. Use it with C<datefmt> to stamp a report, or
-compare it against a Planka timestamp.
+The time of the current render in UTC. Every render binds it once, so a
+report shows one consistent timestamp. Use it with C<datefmt> to stamp a
+report, or compare it against a Planka timestamp.
 
 =item C<{% now %}>
 

@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-from plankarep.filters import build_environment, datefmt, is_future, is_past, now
+from plankarep.filters import build_environment, datefmt, is_future, is_past
 
 NOW = datetime(2026, 10, 26, 13, 0, tzinfo=UTC)
 
@@ -41,11 +41,7 @@ def test_is_future_defaults_to_now() -> None:
     assert is_future(datetime(2999, 1, 1, tzinfo=UTC).isoformat()) is True
 
 
-def test_now_returns_aware_utc_datetime() -> None:
-    assert now().tzinfo is UTC
-
-
-def test_build_environment_defaults_to_cwd(
+def test_build_environment_binds_now_as_an_aware_utc_datetime(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.chdir(tmp_path)
@@ -55,13 +51,13 @@ def test_build_environment_defaults_to_cwd(
     assert environment.filters["datefmt"] is datefmt
     assert environment.tests["past"] is is_past
     assert environment.tests["future"] is is_future
-    assert environment.globals["now"] is now
+    assert environment.globals["now"].tzinfo is UTC  # type: ignore[attr-defined]
 
 
 def test_build_environment_renders_now(tmp_path: Path) -> None:
     environment = build_environment(tmp_path)
 
-    rendered = environment.from_string("{{ now() | datefmt('%Y') }}").render()
+    rendered = environment.from_string("{{ now | datefmt('%Y') }}").render()
 
     assert rendered == str(datetime.now(tz=UTC).year)
 
