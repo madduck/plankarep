@@ -125,6 +125,16 @@ B<plankarep> adds these helpers to the template context:
 Format an ISO 8601 timestamp. The default format is C<%Y-%m-%d>. A C<None>
 value renders as an empty string.
 
+=item C<now>
+
+Return the current time in UTC. Use it with C<datefmt> to stamp a report, or
+compare it against a Planka timestamp.
+
+=item C<{% now %}>
+
+Render the current UTC time. The tag accepts an optional format string and
+defaults to the same C<%Y-%m-%d> format as C<datefmt>.
+
 =item C<past>
 
 Test whether a timestamp is earlier than now.
