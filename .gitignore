@@ -1,0 +1,33 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Setuptools / build artefacts
+build/
+dist/
+*.egg-info/
+.eggs/
+plankarep/_version.py
+plankarep.1
+
+# Virtual environments
+.venv/
+venv/
+
+# Test / coverage / cache artefacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Editor and OS noise
+.idea/
+.swp
+.DS_Store
+
+# Worktrees
+.worktrees/

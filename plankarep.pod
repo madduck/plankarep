@@ -1,0 +1,186 @@
+=encoding UTF-8
+
+=head1 NAME
+
+plankarep - instantiate Jinja2 templates from Planka data gathered via plnk
+
+=head1 SYNOPSIS
+
+B<plankarep> [B<--config> I<FILE>] [B<--template> I<FILE>|B<->] [B<--output> I<FILE>]
+
+=head1 DESCRIPTION
+
+B<plankarep> builds text reports from Planka data. It runs one or more
+B<plnk> commands, collects their JSON output, and renders a Jinja2 template
+with that data.
+
+Each entry in the C<[views]> table of the configuration becomes one template
+variable. The variable holds the C<data> array from the B<plnk> response.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--config> I<FILE>
+
+Read the configuration from I<FILE>. The default is F<./plankarep.toml>. The
+file must exist.
+
+=item B<--template> I<FILE>
+
+Instantiate I<FILE>. The default is F<./plankarep.j2>. Pass C<-> to read the
+template from standard input.
+
+=item B<--output> I<FILE>
+
+Write the result to I<FILE>. The default is standard output.
+
+=item B<-h>, B<--help>
+
+Show a help message and exit.
+
+=item B<--version>
+
+Show the version and exit.
+
+=back
+
+=head1 CONFIGURATION
+
+The configuration is a TOML file with two tables.
+
+=head2 The C<[plnk]> table
+
+The C<[plnk]> table holds the parameters that every B<plnk> call shares.
+
+=over 4
+
+=item C<server> (string)
+
+The Planka server URL. B<plankarep> passes it as C<--server>.
+
+=item C<token> (string)
+
+The Planka API token. B<plankarep> passes it as C<--token>.
+
+=item C<names> (boolean)
+
+C<true> adds C<--names>, C<false> adds C<--no-names>, and an omitted key adds
+neither.
+
+=item C<project> (string)
+
+A project name. B<plankarep> exports it as C<PLNK_PROJECT>.
+
+=item C<board> (string)
+
+A board name. B<plankarep> exports it as C<PLNK_BOARD>.
+
+=item C<list> (string)
+
+A list name. B<plankarep> exports it as C<PLNK_LIST>.
+
+=back
+
+An unknown key stops the program.
+
+=head2 The C<[views]> table
+
+The C<[views]> table maps a view name to the B<plnk> arguments for that view.
+B<plankarep> always adds C<--output json>. A view name becomes a template
+variable that holds the C<data> array.
+
+=head1 TEMPLATES
+
+B<plankarep> loads templates from the directory of the template file. A
+template can use C<{% extends %}> and C<{% include %}> with relative paths.
+When the template comes from standard input, the loader uses the current
+working directory.
+
+B<plankarep> uses strict undefined handling. A template variable that no view
+defines stops the program.
+
+B<plankarep> adds these helpers to the template context:
+
+=over 4
+
+=item C<datefmt>
+
+Format an ISO 8601 timestamp. The default format is C<%Y-%m-%d>. A C<None>
+value renders as an empty string.
+
+=item C<past>
+
+Test whether a timestamp is earlier than now.
+
+=item C<future>
+
+Test whether a timestamp is later than now.
+
+=back
+
+=head1 ENVIRONMENT
+
+B<plankarep> inherits the environment. It sets these variables for each B<plnk>
+call when the configuration provides the matching value:
+
+=over 4
+
+=item C<PLNK_PROJECT>
+
+The value of C<project>.
+
+=item C<PLNK_BOARD>
+
+The value of C<board>.
+
+=item C<PLNK_LIST>
+
+The value of C<list>.
+
+=back
+
+=head1 EXIT STATUS
+
+=over 4
+
+=item B<0>
+
+The command succeeded.
+
+=item B<1>
+
+A view failed, a template is missing or invalid, or the configuration is
+missing or invalid. A failed view prints the C<stderr> output of B<plnk>.
+
+=back
+
+=head1 FILES
+
+=over 4
+
+=item F<./plankarep.toml>
+
+The default configuration file.
+
+=item F<./plankarep.j2>
+
+The default template file.
+
+=back
+
+=head1 SEE ALSO
+
+L<plnk|https://github.com/plattnum/planka-cli>,
+L<Jinja2|https://jinja.palletsprojects.com/>
+
+=head1 AUTHOR
+
+Martin F. Krafft <plankarep@pobox.madduck.net>
+
+=head1 COPYRIGHT
+
+Copyright 2026 Martin F. Krafft.
+
+This program is free software. You can redistribute it and modify it under the
+terms of the MIT License.

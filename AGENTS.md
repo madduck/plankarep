@@ -100,7 +100,7 @@ Overdue projects:
 
 ## Stack
 
-- Python ≥3.14, `Jinja2`
+- Python ≥3.14, `Click`, `Jinja2`
 - `uv` for dependency management, no pip / requirements.txt.
 
 ## Project Structure
