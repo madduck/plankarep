@@ -8,6 +8,8 @@ from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
+from .extensions import NowExtension
+
 
 def _parse_datetime(value: Any) -> datetime:
     """Parse an ISO 8601 string into an aware datetime.
@@ -111,6 +113,7 @@ def build_environment(
         # the [plankarep] table; escaping HTML would mangle report text.
         autoescape=autoescape,  # nosec B701
         keep_trailing_newline=True,
+        extensions=[NowExtension],
     )
     environment.filters["datefmt"] = datefmt
     environment.tests["past"] = is_past

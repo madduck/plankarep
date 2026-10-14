@@ -129,7 +129,7 @@ directory.
 
 ## Filters and tests
 
-plankarep adds four helpers to the template context.
+plankarep adds four helpers and one tag to the template context.
 
 - `datefmt` formats an ISO 8601 timestamp. The default format is `%Y-%m-%d`.
   A `None` value renders as an empty string.
@@ -143,6 +143,13 @@ plankarep adds four helpers to the template context.
 
   ```jinja
   Report generated on {{ now() | datefmt('%d.%m.%Y %H:%M') }} UTC.
+  ```
+
+- `{% now %}` renders the current UTC time. The tag accepts an optional format
+  string and defaults to the same `%Y-%m-%d` format as `datefmt`.
+
+  ```jinja
+  Generated on {% now '%d.%m.%Y' %}.
   ```
 
 - `past` tests whether a timestamp is earlier than now.
