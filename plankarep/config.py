@@ -1,8 +1,9 @@
 """Configuration loading and validation.
 
-The configuration lives in a TOML file with two sections: ``[plnk]`` holds the
-parameters that every ``plnk`` invocation shares, and ``[views]`` maps a view
-name to the ``plnk`` command line arguments that produce its data.
+The configuration lives in a TOML file with three sections: ``[plankarep]``
+holds the rendering options, ``[plnk]`` holds the parameters that every
+``plnk`` invocation shares, and ``[views]`` maps a view name to the ``plnk``
+command line arguments that produce its data.
 """
 
 from __future__ import annotations
@@ -21,6 +22,23 @@ PLNK_STRING_KEYS = frozenset({"server", "token", "project", "board", "list"})
 PLNK_BOOL_KEYS = frozenset({"names"})
 
 _PLNK_KEYS = PLNK_STRING_KEYS | PLNK_BOOL_KEYS
+
+
+#: Boolean keys accepted in the ``[plankarep]`` section.
+PLANKAREP_BOOL_KEYS = frozenset({"autoescape"})
+
+
+@dataclass(frozen=True)
+class RenderOptions:
+    """Options that control template rendering.
+
+    Attributes:
+        autoescape: Whether Jinja2 escapes HTML-significant characters in
+            template variables. The default is ``False``, because plankarep
+            produces plain-text reports.
+    """
+
+    autoescape: bool = False
 
 
 @dataclass(frozen=True)
@@ -50,10 +68,12 @@ class Config:
     """A parsed plankarep configuration.
 
     Attributes:
+        render: Options that control template rendering.
         plnk: Parameters shared by every ``plnk`` invocation.
         views: Mapping of view name to the ``plnk`` command line arguments.
     """
 
+    render: RenderOptions = field(default_factory=RenderOptions)
     plnk: PlnkConfig = field(default_factory=PlnkConfig)
     views: dict[str, str] = field(default_factory=dict)
 
@@ -95,6 +115,35 @@ def _parse_plnk(raw: Any) -> PlnkConfig:
     values["names"] = names
 
     return PlnkConfig(**values)
+
+
+def _parse_render(raw: Any) -> RenderOptions:
+    """Build a :class:`RenderOptions` from the raw ``[plankarep]`` table.
+
+    Args:
+        raw: The value of the ``[plankarep]`` table, or an empty mapping.
+
+    Returns:
+        The validated rendering options.
+
+    Raises:
+        PlankarepError: If the table or one of its values has the wrong type.
+    """
+    if not isinstance(raw, dict):
+        msg = "[plankarep] must be a table"
+        raise PlankarepError(msg)
+
+    unknown = set(raw) - PLANKAREP_BOOL_KEYS
+    if unknown:
+        msg = f"[plankarep] has unknown keys: {', '.join(sorted(unknown))}"
+        raise PlankarepError(msg)
+
+    autoescape = raw.get("autoescape", RenderOptions.autoescape)
+    if not isinstance(autoescape, bool):
+        msg = "[plankarep] key 'autoescape' must be a boolean"
+        raise PlankarepError(msg)
+
+    return RenderOptions(autoescape=autoescape)
 
 
 def _parse_views(raw: Any) -> dict[str, str]:
@@ -148,6 +197,7 @@ def load_config(path: Path) -> Config:
         raise PlankarepError(msg) from exc
 
     return Config(
+        render=_parse_render(raw.get("plankarep", {})),
         plnk=_parse_plnk(raw.get("plnk", {})),
         views=_parse_views(raw.get("views")),
     )

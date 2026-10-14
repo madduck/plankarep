@@ -61,7 +61,15 @@ def test_build_environment_uses_search_path(tmp_path: Path) -> None:
     assert rendered == "hello x"
 
 
-def test_build_environment_autoescapes() -> None:
+def test_build_environment_does_not_autoescape_by_default() -> None:
     rendered = build_environment(Path()).from_string("{{ value }}").render(value="<b>")
+
+    assert rendered == "<b>"
+
+
+def test_build_environment_autoescapes_when_requested() -> None:
+    environment = build_environment(Path(), autoescape=True)
+
+    rendered = environment.from_string("{{ value }}").render(value="<b>")
 
     assert rendered == "&lt;b&gt;"

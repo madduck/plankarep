@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from plankarep.config import Config, PlnkConfig, load_config
+from plankarep.config import Config, PlnkConfig, RenderOptions, load_config
 from plankarep.errors import PlankarepError
 
 
@@ -57,7 +57,46 @@ def test_load_config_defaults(tmp_path: Path) -> None:
 
     config = load_config(path)
 
-    assert config == Config(plnk=PlnkConfig(), views={"all": "card list"})
+    expected = Config(
+        plnk=PlnkConfig(),
+        render=RenderOptions(),
+        views={"all": "card list"},
+    )
+    assert config == expected
+    assert config.render.autoescape is False
+
+
+def test_load_config_autoescape_true(tmp_path: Path) -> None:
+    path = write_config(
+        tmp_path, "[plankarep]\nautoescape = true\n\n[views]\nall = 'card list'\n"
+    )
+
+    assert load_config(path).render.autoescape is True
+
+
+def test_plankarep_not_a_table(tmp_path: Path) -> None:
+    path = write_config(tmp_path, 'plankarep = "oops"\n\n[views]\nall = "card list"\n')
+
+    with pytest.raises(PlankarepError, match=r"\[plankarep\] must be a table"):
+        load_config(path)
+
+
+def test_plankarep_unknown_key(tmp_path: Path) -> None:
+    path = write_config(
+        tmp_path, "[plankarep]\nnope = true\n\n[views]\nall = 'card list'\n"
+    )
+
+    with pytest.raises(PlankarepError, match="unknown keys: nope"):
+        load_config(path)
+
+
+def test_plankarep_autoescape_wrong_type(tmp_path: Path) -> None:
+    path = write_config(
+        tmp_path, "[plankarep]\nautoescape = 'yes'\n\n[views]\nall = 'card list'\n"
+    )
+
+    with pytest.raises(PlankarepError, match="key 'autoescape' must be a boolean"):
+        load_config(path)
 
 
 def test_load_config_names_false(tmp_path: Path) -> None:

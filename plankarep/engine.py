@@ -185,7 +185,7 @@ def render(
         PlankarepError: If the template cannot be loaded or rendered, or if a
             view fails.
     """
-    environment = build_environment(search_path)
+    environment = build_environment(search_path, autoescape=config.render.autoescape)
     try:
         template = environment.get_template(template_name)
     except TemplateNotFound as exc:
@@ -226,7 +226,7 @@ def render_string(
     Raises:
         PlankarepError: If the template is invalid or a view fails.
     """
-    environment = build_environment(search_path)
+    environment = build_environment(search_path, autoescape=config.render.autoescape)
     try:
         template = environment.from_string(source)
     except TemplateError as exc:

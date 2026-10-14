@@ -28,7 +28,14 @@ uv tool install git+https://github.com/madduck/plankarep
 ## Configuration
 
 plankarep reads a TOML file. The default path is `./plankarep.toml`. The file
-has two tables.
+has three tables.
+
+The `[plankarep]` table holds the rendering options:
+
+- `autoescape`: a boolean. `true` escapes HTML-significant characters (`&`,
+  `<`, `>`) in template variables. An omitted key is the same as `false`,
+  because plankarep produces plain-text reports. An unknown key stops the
+  program.
 
 The `[plnk]` table holds the parameters that every `plnk` call shares.
 plankarep accepts these keys:
@@ -47,6 +54,9 @@ The `[views]` table maps a view name to the `plnk` arguments for that view.
 plankarep always adds `--output json`.
 
 ```toml
+[plankarep]
+autoescape = false
+
 [plnk]
 server = "https://planka.example.org"
 token = "foobar"

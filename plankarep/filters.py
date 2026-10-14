@@ -73,16 +73,20 @@ def is_future(value: Any, now: datetime | None = None) -> bool:
     return _parse_datetime(value) > reference
 
 
-def build_environment(search_path: Path | None = None) -> Environment:
+def build_environment(
+    search_path: Path | None = None, *, autoescape: bool = False
+) -> Environment:
     """Create the Jinja2 environment used to render templates.
 
-    The environment uses strict undefined handling, enables autoescaping, and
-    loads templates from ``search_path`` so that ``{% extends %}`` and
-    ``{% include %}`` resolve relative to the template.
+    The environment uses strict undefined handling and loads templates from
+    ``search_path`` so that ``{% extends %}`` and ``{% include %}`` resolve
+    relative to the template.
 
     Args:
         search_path: Directory to load templates from. Defaults to the current
             working directory.
+        autoescape: Whether to escape HTML-significant characters in template
+            variables. The default is ``False``.
 
     Returns:
         The configured environment.
@@ -91,7 +95,7 @@ def build_environment(search_path: Path | None = None) -> Environment:
     environment = Environment(
         loader=FileSystemLoader(str(root)),
         undefined=StrictUndefined,
-        autoescape=True,
+        autoescape=autoescape,
         keep_trailing_newline=True,
     )
     environment.filters["datefmt"] = datefmt

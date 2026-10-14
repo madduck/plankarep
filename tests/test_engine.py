@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from plankarep.config import Config, PlnkConfig
+from plankarep.config import Config, PlnkConfig, RenderOptions
 from plankarep.engine import (
     build_argv,
     build_env,
@@ -194,6 +194,43 @@ def test_render_missing_template(
 
     with pytest.raises(PlankarepError, match="not found"):
         render(config, "absent.j2", search_path=tmp_path, runner=runner)
+
+
+def test_render_honours_autoescape(
+    tmp_path: Path,
+    make_completed: CompletedFactory,
+    make_payload: PayloadFactory,
+    fake_runner: RunnerFactory,
+) -> None:
+    (tmp_path / "t.j2").write_text("{{ cards[0].name }}", encoding="utf-8")
+    runner = fake_runner(make_completed(stdout=make_payload([{"name": "A & B"}])))
+    config = Config(
+        plnk=PlnkConfig(),
+        render=RenderOptions(autoescape=True),
+        views={"cards": "card list"},
+    )
+
+    assert render(config, "t.j2", search_path=tmp_path, runner=runner) == "A &amp; B"
+
+
+def test_render_string_honours_autoescape(
+    tmp_path: Path,
+    make_completed: CompletedFactory,
+    make_payload: PayloadFactory,
+    fake_runner: RunnerFactory,
+) -> None:
+    runner = fake_runner(make_completed(stdout=make_payload([{"name": "A & B"}])))
+    config = Config(
+        plnk=PlnkConfig(),
+        render=RenderOptions(autoescape=True),
+        views={"cards": "card list"},
+    )
+
+    result = render_string(
+        config, "{{ cards[0].name }}", search_path=tmp_path, runner=runner
+    )
+
+    assert result == "A &amp; B"
 
 
 def test_render_reports_syntax_error(

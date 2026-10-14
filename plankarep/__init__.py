@@ -14,7 +14,7 @@ The ``VERSION`` constant defaults to ``"unknown"`` until a build writes
 ``_version.py``.
 """
 
-from .config import Config, PlnkConfig, load_config
+from .config import Config, PlnkConfig, RenderOptions, load_config
 from .engine import render, render_string
 from .errors import PlankarepError
 
@@ -28,6 +28,7 @@ __all__ = [
     "Config",
     "PlankarepError",
     "PlnkConfig",
+    "RenderOptions",
     "load_config",
     "render",
     "render_string",

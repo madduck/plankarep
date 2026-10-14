@@ -19,9 +19,13 @@ plankarep --config /path/to/config.toml --template /path/to/template.j2 > output
 
 A TOML-file provides a mapping between a view and the corresponding `plnk`
 command line. The TOML file also has a section where users can provide the
-parameters required by `plnk` to do its work:
+parameters required by `plnk` to do its work, and a section for rendering
+options:
 
 ```TOML
+[plankarep]
+autoescape = false
+
 [plnk]
 server = "https://planka.example.org"
 token = "foobar"

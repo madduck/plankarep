@@ -47,7 +47,21 @@ Show the version and exit.
 
 =head1 CONFIGURATION
 
-The configuration is a TOML file with two tables.
+The configuration is a TOML file with three tables.
+
+=head2 The C<[plankarep]> table
+
+The C<[plankarep]> table holds the rendering options.
+
+=over 4
+
+=item C<autoescape> (boolean)
+
+C<true> escapes HTML-significant characters (C<&>, C<E<lt>>, C<E<gt>>) in
+template variables. An omitted key is the same as C<false>, because
+B<plankarep> produces plain-text reports. An unknown key stops the program.
+
+=back
 
 =head2 The C<[plnk]> table
 
