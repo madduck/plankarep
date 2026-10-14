@@ -152,11 +152,12 @@ plankarep adds four helpers and one tag to the template context.
   {{ card.dueDate | datefmt('%d.%m.%Y') }}
   ```
 
-- `now` returns the current time in UTC. Use it with `datefmt` to stamp a
+- `now` is the time of the current render in UTC. Every render binds it once,
+  so a report shows one consistent timestamp. Use it with `datefmt` to stamp a
   report, or compare it against a Planka timestamp.
 
   ```jinja
-  Report generated on {{ now() | datefmt('%d.%m.%Y %H:%M') }} UTC.
+  Report generated on {{ now | datefmt('%d.%m.%Y %H:%M') }} UTC.
   ```
 
 - `{% now %}` renders the current UTC time. The tag accepts an optional format
