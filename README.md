@@ -11,7 +11,8 @@ variable. The variable holds the `data` array from the `plnk` response.
 ## Requirements
 
 - Python 3.14 or later.
-- `plnk` on your `PATH`. `plankarep` calls `plnk` for every view.
+- [`plnk`](https://github.com/plattnum/planka-cli) on your `PATH`. `plankarep`
+  calls `plnk` for every view.
 - Jinja2 and Click. The package installs both.
 
 You need `pod2man` only when you build the package from source. `pod2man` ships
