@@ -90,6 +90,52 @@ def test_cli_writes_output_file(
     assert output.read_text(encoding="utf-8") == "Alpha"
 
 
+def test_cli_leaves_output_untouched_when_a_view_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    make_completed: CompletedFactory,
+    stub_runner: Any,
+) -> None:
+    config, template = write_inputs(tmp_path)
+    failure = json.dumps({"success": False, "data": []})
+    patch_runner(monkeypatch, make_completed(stdout=failure), stub_runner)
+    output = tmp_path / "out.txt"
+    output.write_text("previous", encoding="utf-8")
+
+    result = CliRunner().invoke(
+        main,
+        ["--config", str(config), "--template", str(template), "--output", str(output)],
+    )
+
+    assert result.exit_code == 1
+    assert output.read_text(encoding="utf-8") == "previous"
+
+
+def test_cli_reports_unwritable_output(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    make_completed: CompletedFactory,
+    stub_runner: Any,
+) -> None:
+    config, template = write_inputs(tmp_path)
+    patch_runner(monkeypatch, make_completed(stdout=PAYLOAD), stub_runner)
+
+    result = CliRunner().invoke(
+        main,
+        [
+            "--config",
+            str(config),
+            "--template",
+            str(template),
+            "--output",
+            str(tmp_path / "absent" / "out.txt"),
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert "cannot write" in result.output
+
+
 def test_cli_reports_view_failure(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import IO
 
 import click
 
@@ -37,13 +36,12 @@ _OUTPUT_HELP = "Write the result here instead of standard output."
 )
 @click.option(
     "--output",
-    "output",
-    type=click.File("w", encoding="utf-8", lazy=True),
-    default="-",
-    show_default=True,
+    "output_path",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
     help=_OUTPUT_HELP,
 )
-def main(config_path: Path, template: str, output: IO[str] | None) -> None:
+def main(config_path: Path, template: str, output_path: Path | None) -> None:
     """Instantiate a template from data gathered by ``plnk``."""
     try:
         config = load_config(config_path)
@@ -57,7 +55,15 @@ def main(config_path: Path, template: str, output: IO[str] | None) -> None:
     except PlankarepError as exc:
         raise click.ClickException(str(exc)) from exc
 
-    click.echo(rendered, file=output, nl=False)
+    if output_path is None:
+        sys.stdout.write(rendered)
+        return
+
+    try:
+        output_path.write_text(rendered, encoding="utf-8")
+    except OSError as exc:
+        msg = f"cannot write {output_path}: {exc}"
+        raise click.ClickException(msg) from exc
 
 
 if __name__ == "__main__":  # pragma: no cover - module entry point

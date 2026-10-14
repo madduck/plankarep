@@ -33,7 +33,9 @@ template from standard input.
 
 =item B<--output> I<FILE>
 
-Write the result to I<FILE>. The default is standard output.
+Write the result to I<FILE>. The default is standard output. B<plankarep> opens
+the file only after every view succeeds and the template renders. A failed run
+therefore leaves an existing file unchanged.
 
 =item B<-h>, B<--help>
 
@@ -164,8 +166,9 @@ The command succeeded.
 
 =item B<1>
 
-A view failed, a template is missing or invalid, or the configuration is
-missing or invalid. A failed view prints the C<stderr> output of B<plnk>.
+A view failed, a template is missing or invalid, the configuration is missing
+or invalid, or C<--output> cannot be written. A failed view prints the C<stderr>
+output of B<plnk>.
 
 =back
 

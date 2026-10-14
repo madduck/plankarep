@@ -91,6 +91,8 @@ plankarep --config /path/to/config.toml --template /path/to/template.j2 > output
 `./plankarep.j2`. Pass `-` as the template to read it from standard input.
 
 `--output` writes the result to a file. The default is standard output.
+plankarep opens the file only after every view succeeds and the template
+renders. A failed run therefore leaves an existing file unchanged.
 
 ```sh
 plankarep --config config.toml --template report.j2 --output report.txt
@@ -151,8 +153,9 @@ plankarep adds three helpers to the template context.
 ## Exit codes
 
 plankarep exits with `0` on success. It exits with `1` when a view fails, when a
-template is missing or invalid, or when the configuration is missing or
-invalid. A failed view prints the `stderr` output of `plnk`.
+template is missing or invalid, when the configuration is missing or invalid,
+or when `--output` cannot be written. A failed view prints the `stderr` output
+of `plnk`.
 
 ## Development
 

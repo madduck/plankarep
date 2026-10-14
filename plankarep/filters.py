@@ -95,7 +95,9 @@ def build_environment(
     environment = Environment(
         loader=FileSystemLoader(str(root)),
         undefined=StrictUndefined,
-        autoescape=autoescape,
+        # plankarep produces plain-text reports. Autoescaping is opt-in via
+        # the [plankarep] table; escaping HTML would mangle report text.
+        autoescape=autoescape,  # nosec B701
         keep_trailing_newline=True,
     )
     environment.filters["datefmt"] = datefmt
