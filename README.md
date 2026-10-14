@@ -100,12 +100,14 @@ plankarep --config config.toml --template report.j2 --output report.txt
 
 ## Template example
 
-The template below reads the `overdue` view from the configuration above:
+The template below reads the `overdue` view from the configuration above.
+Every view is scoped under `views`, so the view `overdue` is available as
+`views.overdue`:
 
 ```jinja
 Overdue projects:
 
-{% for card in overdue %}
+{% for card in views.overdue %}
 - {{ card.name }} (ID: {{ card.id }})
 {% endfor %}
 ```
@@ -128,6 +130,18 @@ you read the template from standard input, the loader uses the current working
 directory.
 
 ## Filters and tests
+
+Each view is available in the template context under `views`, keyed by its view
+name. When the configuration sets `server`, the Planka server URL is also
+available as `server`.
+
+```jinja
+[{{ server }}] Overdue projects:
+
+{% for card in views.overdue %}
+- {{ card.name }}
+{% endfor %}
+```
 
 plankarep adds four helpers and one tag to the template context.
 

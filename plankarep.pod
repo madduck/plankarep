@@ -103,8 +103,8 @@ An unknown key stops the program.
 =head2 The C<[views]> table
 
 The C<[views]> table maps a view name to the B<plnk> arguments for that view.
-B<plankarep> always adds C<--output json>. A view name becomes a template
-variable that holds the C<data> array.
+B<plankarep> always adds C<--output json>. Each view becomes an entry in the
+C<views> template variable that holds the C<data> array.
 
 =head1 TEMPLATES
 
@@ -115,6 +115,11 @@ working directory.
 
 B<plankarep> uses strict undefined handling. A template variable that no view
 defines stops the program.
+
+Each view is available in the template context under C<views>, keyed by its
+view name. The view C<overdue> is therefore available as C<views.overdue>.
+When the configuration sets C<server>, the Planka server URL is also
+available as C<server>.
 
 B<plankarep> adds these helpers to the template context:
 
