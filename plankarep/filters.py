@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from jinja2 import (
+    Environment,
+    FileSystemLoader,
+    StrictUndefined,
+    Undefined,
+    pass_environment,
+)
+from jinja2.filters import make_attrgetter
 
 from .extensions import NowExtension
 
@@ -36,13 +44,15 @@ def datefmt(value: Any, fmt: str = "%Y-%m-%d") -> str:
     """Format an ISO 8601 timestamp.
 
     Args:
-        value: The timestamp to format. ``None`` renders as an empty string.
+        value: The timestamp to format. ``None`` or a missing value renders as
+            an empty string.
         fmt: A :meth:`datetime.datetime.strftime` format string.
 
     Returns:
-        The formatted timestamp, or an empty string for ``None``.
+        The formatted timestamp, or an empty string for ``None`` or a missing
+        value.
     """
-    if value is None:
+    if value is None or isinstance(value, Undefined):
         return ""
     return _parse_datetime(value).strftime(fmt)
 
@@ -73,6 +83,45 @@ def is_future(value: Any, now: datetime | None = None) -> bool:
     """
     reference = now if now is not None else datetime.now(tz=UTC)
     return _parse_datetime(value) > reference
+
+
+@pass_environment
+def sort_by_date(
+    environment: Environment,
+    value: Iterable[Any],
+    attribute: str,
+    *,
+    reverse: bool = False,
+) -> list[Any]:
+    """Sort items by an ISO 8601 timestamp attribute, keeping undated items last.
+
+    Jinja2's built-in ``sort`` filter compares raw values. If an item's
+    timestamp is ``None``, comparing it with a string raises ``TypeError``.
+    This filter parses the timestamps first and compares the resulting
+    datetimes. Items whose timestamp is ``None`` or missing are appended after
+    the sorted items, in their original order.
+
+    Args:
+        environment: The Jinja2 environment. The decorator supplies it.
+        value: The items to sort.
+        attribute: The attribute or key that holds the timestamp. Dot notation
+            is supported, for example ``"card.dueDate"``.
+        reverse: Sort descending instead of ascending. Undated items stay last.
+
+    Returns:
+        A new list with the dated items sorted and the undated items last.
+    """
+    get_attribute = make_attrgetter(environment, attribute)
+    dated: list[tuple[datetime, Any]] = []
+    undated: list[Any] = []
+    for item in value:
+        timestamp = get_attribute(item)
+        if timestamp is None or isinstance(timestamp, Undefined):
+            undated.append(item)
+        else:
+            dated.append((_parse_datetime(timestamp), item))
+    dated.sort(key=lambda pair: pair[0], reverse=reverse)
+    return [item for _, item in dated] + undated
 
 
 def build_environment(
@@ -108,6 +157,7 @@ def build_environment(
         extensions=[NowExtension],
     )
     environment.filters["datefmt"] = datefmt
+    environment.filters["sort_by_date"] = sort_by_date
     environment.tests["past"] = is_past
     environment.tests["future"] = is_future
     environment.globals["now"] = datetime.now(tz=UTC)

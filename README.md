@@ -143,14 +143,26 @@ available as `server`.
 {% endfor %}
 ```
 
-`plankarep` adds four helpers and one tag to the template context.
+`plankarep` adds five helpers and one tag to the template context.
 
 - `datefmt` formats an ISO 8601 timestamp. The default format is `%Y-%m-%d`. A
-  `None` value renders as an empty string.
+  `None` or missing value renders as an empty string.
 
   ```jinja
   {{ card.dueDate | datefmt('%d.%m.%Y') }}
   ```
+
+- `sort_by_date` sorts a list by an ISO 8601 timestamp attribute. Jinja2's
+  built-in `sort` filter compares raw values, so a `None` timestamp and a string
+  raise `TypeError`. This filter parses the timestamps first. Items with a
+  `None` or missing timestamp go last, in their original order. Pass
+  `reverse=true` to sort descending.
+
+  ```jinja
+  {% for card in views.overdue | sort_by_date('dueDate') %}
+  ```
+
+  Dot notation is supported, for example `sort_by_date('card.dueDate')`.
 
 - `now` is the time of the current render in UTC. Every render binds it once, so
   a report shows one consistent timestamp. Use it with `datefmt` to stamp a

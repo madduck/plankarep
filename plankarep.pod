@@ -128,7 +128,16 @@ B<plankarep> adds these helpers to the template context:
 =item C<datefmt>
 
 Format an ISO 8601 timestamp. The default format is C<%Y-%m-%d>. A C<None>
-value renders as an empty string.
+or missing value renders as an empty string.
+
+=item C<sort_by_date>
+
+Sort a list by an ISO 8601 timestamp attribute. Jinja2's built-in C<sort>
+filter compares raw values, so a C<None> timestamp and a string raise
+C<TypeError>. This filter parses the timestamps first. Items with a C<None>
+or missing timestamp go last, in their original order. Pass C<reverse=true>
+to sort descending. Dot notation is supported, for example
+C<sort_by_date('card.dueDate')>.
 
 =item C<now>
 
