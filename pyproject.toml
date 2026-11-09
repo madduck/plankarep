@@ -8,20 +8,17 @@ description = "Instantiate Jinja2 templates from Planka data gathered via plnk."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 authors = [{ name = "Martin F. Krafft", email = "plankarep@pobox.madduck.net" }]
 keywords = ["planka", "jinja2", "template", "report", "cli"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Utilities",
 ]
-dependencies = [
-  "click>=8.1",
-  "jinja2>=3.1",
-]
+dependencies = ["click>=8.1", "jinja2>=3.1"]
 dynamic = ["version"]
 
 [project.urls]
@@ -43,10 +40,7 @@ dev = [
   "ruff>=0.17",
   "types-setuptools>=70.0",
 ]
-scripts = [
-  "markdown2>=2.5",
-  "matrix-nio>=0.26",
-]
+scripts = ["markdown2>=2.5", "matrix-nio>=0.26"]
 
 [tool.setuptools_scm]
 version_file = "plankarep/_version.py"
@@ -60,10 +54,7 @@ include = ["plankarep*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = [
-  "--cov=plankarep",
-  "--cov-report=term-missing",
-]
+addopts = ["--cov=plankarep", "--cov-report=term-missing"]
 
 [tool.coverage.run]
 branch = true
@@ -121,8 +112,8 @@ select = [
   "W",
 ]
 ignore = [
-  "D203", # one-blank-line-before-class (prefer D211)
-  "D212", # multi-line-summary-first-line (prefer D213)
+  "D203",  # one-blank-line-before-class (prefer D211)
+  "D212",  # multi-line-summary-first-line (prefer D213)
   "TC001", # runtime imports are clearer than type-checking blocks
   "TC002",
   "TC003",
